@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../redux/slices/authSlice';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -9,6 +11,7 @@ const Login = () => {
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -19,12 +22,11 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/User/login', formData);
-            const { token } = response.data;
+            const { token, user } = response.data; // Changed 'User' to 'user' to match Redux state structure
 
             if (token) {
-                // Store the token in localStorage or in a state management solution like Redux
-                localStorage.setItem('token', token);
-                navigate('/'); // Redirect to home or dashboard after successful login
+                dispatch(setCredentials({ token, user })); // Use 'user' instead of 'User'
+                navigate('/');
                 alert('Login successful!');
             } else {
                 setError('Login failed. Please try again.');
