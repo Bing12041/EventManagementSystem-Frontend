@@ -1,6 +1,5 @@
 import React from 'react';
-import '../index.css'; // Import global styles
-import '../App.css'; // Import app-specific styles
+import { Link } from 'react-router-dom';
 
 const Header = () => {
     return (
@@ -9,9 +8,8 @@ const Header = () => {
                 <h1>Event Management System</h1>
                 <nav>
                     <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#events">Events</a></li>
-                        <li><a href="#about">About</a></li>
+                        <li><Link to="/">Home</Link></li>
+                        <li><Link to="/register">Register</Link></li>
                     </ul>
                 </nav>
             </div>
