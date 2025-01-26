@@ -1,8 +1,10 @@
+// pages/EventList.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import RSVPButton from '../components/RSVPButton';
+import EventMap from '../components/EventMap'; // Assuming this path is correct
 
 const EventList = () => {
     const [events, setEvents] = useState([]);
@@ -18,7 +20,6 @@ const EventList = () => {
 
     const fetchAllData = async () => {
         try {
-            // Fetch events, locations, and categories
             const [eventsResponse, locationsResponse, categoriesResponse] = await Promise.all([
                 axios.get('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Event', {
                     headers: {
@@ -53,7 +54,6 @@ const EventList = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            // After successful deletion, refresh all data
             fetchAllData();
             alert('Event deleted successfully!');
         } catch (error) {
@@ -71,7 +71,6 @@ const EventList = () => {
         return date.toLocaleString();
     };
 
-    // Helper functions to get location and category names by ID
     const getLocationName = (locationId) => {
         const location = locations.find(loc => loc.locationID === locationId);
         return location ? location.address : 'Location not found';
@@ -85,6 +84,7 @@ const EventList = () => {
     return (
         <div className="container">
             <h2>Event List</h2>
+            <EventMap /> {/* Here we add the map */}
             {events.length > 0 ? (
                 <ul>
                     {events.map(event => (
