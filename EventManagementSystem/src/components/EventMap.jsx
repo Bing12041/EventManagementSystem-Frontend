@@ -13,7 +13,7 @@ const EventMap = () => {
     const mapState = useSelector((state) => state.map);
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: 'AIzaSyATfVIu3BPTEsD4xPQLwq6gnJiOZF8pFjI'
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     });
 
     const [map, setMap] = React.useState(null);
