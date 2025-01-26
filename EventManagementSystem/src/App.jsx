@@ -6,6 +6,10 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import EventList from './pages/EventList';
+import CreateEvent from './pages/CreateEvent';
+import ManageLocation from './pages/ManageLocation';
+import ManageCategory from './pages/ManageCategory';
 
 function App() {
   return (
@@ -17,6 +21,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/events" element={<EventList />} />
+            <Route path="/create-event" element={<CreateEvent />} />
+            <Route path="/manage-location" element={<ManageLocation />} />
+            <Route path="/manage-category" element={<ManageCategory />} />
           </Routes>
         </main>
         <Footer />

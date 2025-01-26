@@ -15,6 +15,10 @@ const Header = () => {
                 <nav>
                     <ul>
                         <li><Link to="/">Home</Link></li>
+                        <li><Link to="/events">Events</Link></li>
+                        {user && <li><Link to="/create-event">Create Event</Link></li>}
+                        {user && <li><Link to="/manage-location">Manage Locations</Link></li>}
+                        {user && <li><Link to="/manage-category">Manage Categories</Link></li>}  {/* New link */}
                         <li><Link to="/register">Register</Link></li>
                         {user ? (
                             <>
