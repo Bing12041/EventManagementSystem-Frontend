@@ -1,93 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { setCredentials } from '../redux/slices/authSlice';
 
 const CreateEvent = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const storedToken = useSelector((state) => state.auth.token) || localStorage.getItem('token');
+    const storedUser = useSelector((state) => state.auth.user) || JSON.parse(localStorage.getItem('user'));
+
     const [formData, setFormData] = useState({
-        Title: '',
-        Description: '',
-        StartDate: '',
-        EndDate: '',
-        CreatedBy: '',
-        CategoryID: '',
-        LocationID: ''
+        title: '',
+        description: '',
+        startTime: '',
+        endTime: '',
+        categoryID: '',
+        locationID: '',
     });
-    const [error, setError] = useState('');
+
     const [categories, setCategories] = useState([]);
     const [locations, setLocations] = useState([]);
-    const navigate = useNavigate();
-    const user = useSelector((state) => state.auth.user);
-    const token = useSelector((state) => state.auth.token);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (!storedUser || !storedToken) {
+            const savedUser = JSON.parse(localStorage.getItem('user'));
+            const savedToken = localStorage.getItem('token');
+            if (savedUser && savedToken) {
+                dispatch(setCredentials({ token: savedToken, user: savedUser }));
+            } else {
+                setError('User authentication required to create an event');
+                navigate('/login');
+            }
+        }
+    }, [dispatch, storedUser, storedToken, navigate]);
 
     useEffect(() => {
         const fetchCategoriesAndLocations = async () => {
+            const authToken = storedToken || localStorage.getItem('token');
+            if (!authToken) {
+                setError('User authentication required to create an event');
+                return;
+            }
+
             try {
-                // Fetch categories
                 const categoryResponse = await axios.get('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Category', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 setCategories(categoryResponse.data);
 
-                // Fetch locations
                 const locationResponse = await axios.get('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Location', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 setLocations(locationResponse.data);
             } catch (error) {
-                console.error('Error fetching categories or locations:', error);
                 setError('Error fetching categories or locations');
             }
         };
 
         fetchCategoriesAndLocations();
-    }, [token]);
+    }, [storedToken]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const validateForm = () => {
-        if (!formData.Title || !formData.Description || !formData.StartDate || !formData.EndDate || !formData.CategoryID || !formData.LocationID) {
-            setError('Please fill all fields');
-            return false;
-        }
-
-        const startDate = new Date(formData.StartDate);
-        const endDate = new Date(formData.EndDate);
-
-        if (startDate >= endDate) {
-            setError('End date must be after start date');
-            return false;
-        }
-
-        return true;
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            formData.CreatedBy = user.UserID; // Adjust based on your auth state structure
+        console.log('Form submission triggered');
 
-            try {
-                const response = await axios.post('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Event', formData, {
+        const currentToken = storedToken || localStorage.getItem('token');
+        const currentUser = storedUser || JSON.parse(localStorage.getItem('user'));
+
+        console.log('User:', currentUser);
+        console.log('Token:', currentToken);
+
+        if (!currentUser || !currentUser.userID || !currentToken) {
+            setError('User authentication required to create an event');
+            return;
+        }
+
+        const submissionData = {
+            Title: formData.title,
+            Description: formData.description,
+            StartDate: new Date(formData.startTime),
+            EndDate: new Date(formData.endTime),
+            CreatedBy: parseInt(currentUser.userID, 10),
+            CategoryID: parseInt(formData.categoryID, 10),
+            LocationID: parseInt(formData.locationID, 10)
+        };
+
+        try {
+            const response = await axios.post(
+                'https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Event',
+                submissionData,
+                {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
                     }
-                });
-
-                alert('Event created successfully!');
-                navigate('/events'); // Redirect to the event list after creation
-            } catch (error) {
-                if (error.response) {
-                    setError(error.response.data || 'Error creating event');
-                } else if (error.request) {
-                    setError('No response from server');
-                } else {
-                    setError('Error setting up the request');
                 }
-                console.error('Error:', error);
+            );
+            alert('Event created successfully!');
+            navigate('/events');
+        } catch (error) {
+            if (error.response && error.response.data) {
+                setError(JSON.stringify(error.response.data));
+            } else {
+                setError('Error creating event');
             }
         }
     };
@@ -96,61 +119,60 @@ const CreateEvent = () => {
         <div className="container">
             <h2>Create Event</h2>
             {error && <p style={{ color: 'red' }}>{error}</p>}
+
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"
-                    name="Title"
-                    value={formData.Title}
+                    name="title"
+                    value={formData.title}
                     onChange={handleChange}
                     placeholder="Event Title"
                     required
                 />
                 <textarea
-                    name="Description"
-                    value={formData.Description}
+                    name="description"
+                    value={formData.description}
                     onChange={handleChange}
                     placeholder="Event Description"
                     required
                 />
                 <input
                     type="datetime-local"
-                    name="StartDate"
-                    value={formData.StartDate}
+                    name="startTime"
+                    value={formData.startTime}
                     onChange={handleChange}
-                    placeholder="Start Date & Time"
                     required
                 />
                 <input
                     type="datetime-local"
-                    name="EndDate"
-                    value={formData.EndDate}
+                    name="endTime"
+                    value={formData.endTime}
                     onChange={handleChange}
-                    placeholder="End Date & Time"
                     required
                 />
                 <select
-                    name="CategoryID"
-                    value={formData.CategoryID}
+                    name="categoryID"
+                    value={formData.categoryID}
                     onChange={handleChange}
                     required
                 >
                     <option value="">Select Category</option>
                     {categories.map(category => (
-                        <option key={category.CategoryID} value={category.CategoryID}>
-                            {category.Name}
+                        <option key={category.categoryID} value={category.categoryID}>
+                            {category.name}
                         </option>
                     ))}
                 </select>
                 <select
-                    name="LocationID"
-                    value={formData.LocationID}
+                    name="locationID"
+                    value={formData.locationID}
                     onChange={handleChange}
                     required
                 >
                     <option value="">Select Location</option>
                     {locations.map(location => (
-                        <option key={location.LocationID} value={location.LocationID}>
-                            {`${location.Address}, ${location.City}, ${location.State}`}
+                        <option key={location.locationID} value={location.locationID}>
+                            {location.address}
                         </option>
                     ))}
                 </select>

@@ -10,6 +10,7 @@ import EventList from './pages/EventList';
 import CreateEvent from './pages/CreateEvent';
 import ManageLocation from './pages/ManageLocation';
 import ManageCategory from './pages/ManageCategory';
+import UpdateEvent from './pages/UpdateEvent'; // Import the new UpdateEvent component
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/manage-location" element={<ManageLocation />} />
             <Route path="/manage-category" element={<ManageCategory />} />
+            <Route path="/events/:eventId/edit" element={<UpdateEvent />} /> {/* New route for updating an event */}
           </Routes>
         </main>
         <Footer />

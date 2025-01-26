@@ -18,7 +18,7 @@ const Header = () => {
                         <li><Link to="/events">Events</Link></li>
                         {user && <li><Link to="/create-event">Create Event</Link></li>}
                         {user && <li><Link to="/manage-location">Manage Locations</Link></li>}
-                        {user && <li><Link to="/manage-category">Manage Categories</Link></li>}  {/* New link */}
+                        {user && <li><Link to="/manage-category">Manage Categories</Link></li>}
                         <li><Link to="/register">Register</Link></li>
                         {user ? (
                             <>

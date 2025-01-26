@@ -22,10 +22,17 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/User/login', formData);
-            const { token, user } = response.data; // Changed 'User' to 'user' to match Redux state structure
+            const { token, user } = response.data; // Assuming 'user' from backend includes an ID field
 
             if (token) {
-                dispatch(setCredentials({ token, user })); // Use 'user' instead of 'User'
+                // Ensure user object has UserID property
+                dispatch(setCredentials({ 
+                    token, 
+                    user: { 
+                        UserID: user.userId || user.id, // Adjust based on your backend's user ID field
+                        ...user
+                    }
+                }));
                 navigate('/');
                 alert('Login successful!');
             } else {

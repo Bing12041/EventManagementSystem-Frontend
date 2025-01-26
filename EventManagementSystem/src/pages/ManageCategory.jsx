@@ -121,7 +121,7 @@ const ManageCategory = () => {
             <ul>
                 {categories.map(category => (
                     <li key={category.categoryID}>
-                        {category.Name}
+                        {category.name} {/* Display the category name here */}
                         <button onClick={() => handleEdit(category)}>Edit</button>
                         <button onClick={() => handleDelete(category.categoryID)}>Delete</button>
                     </li>
@@ -133,8 +133,8 @@ const ManageCategory = () => {
                     <input 
                         type="text" 
                         name="Name" 
-                        value={editCategory.Name} 
-                        onChange={(e) => setEditCategory({ ...editCategory, Name: e.target.value })} 
+                        value={editCategory.name} 
+                        onChange={(e) => setEditCategory({ ...editCategory, name: e.target.value })} 
                         placeholder="Category Name" 
                         required 
                     />
