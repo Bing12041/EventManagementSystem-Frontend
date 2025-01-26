@@ -6,25 +6,43 @@ import RSVPButton from '../components/RSVPButton';
 
 const EventList = () => {
     const [events, setEvents] = useState([]);
+    const [locations, setLocations] = useState([]);
+    const [categories, setCategories] = useState([]);
     const token = useSelector((state) => state.auth.token);
     const user = useSelector((state) => state.auth.user);
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchEvents();
+        fetchAllData();
     }, [token]);
 
-    const fetchEvents = async () => {
+    const fetchAllData = async () => {
         try {
-            const response = await axios.get('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Event', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            setEvents(response.data);
+            // Fetch events, locations, and categories
+            const [eventsResponse, locationsResponse, categoriesResponse] = await Promise.all([
+                axios.get('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Event', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }),
+                axios.get('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Location', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }),
+                axios.get('https://eventmanagementsystem-dra9a9cffed8bwcw.eastus2-01.azurewebsites.net/api/Category', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+            ]);
+
+            setEvents(eventsResponse.data);
+            setLocations(locationsResponse.data);
+            setCategories(categoriesResponse.data);
         } catch (error) {
-            console.error('Error fetching events:', error);
-            alert('Failed to load events. Please try again later.');
+            console.error('Error fetching data:', error);
+            alert('Failed to load data. Please try again later.');
         }
     };
 
@@ -35,8 +53,8 @@ const EventList = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            // After successful deletion, refresh the event list
-            fetchEvents();
+            // After successful deletion, refresh all data
+            fetchAllData();
             alert('Event deleted successfully!');
         } catch (error) {
             console.error('Error deleting event:', error);
@@ -53,6 +71,17 @@ const EventList = () => {
         return date.toLocaleString();
     };
 
+    // Helper functions to get location and category names by ID
+    const getLocationName = (locationId) => {
+        const location = locations.find(loc => loc.locationID === locationId);
+        return location ? location.address : 'Location not found';
+    };
+
+    const getCategoryName = (categoryId) => {
+        const category = categories.find(cat => cat.categoryID === categoryId);
+        return category ? category.name : 'Category not found';
+    };
+
     return (
         <div className="container">
             <h2>Event List</h2>
@@ -62,8 +91,8 @@ const EventList = () => {
                         <li key={`${event.eventID}-${event.startDate}`}>
                             <h3>{event.title}</h3>
                             <p>Date: {formatDate(event.startDate)} - {formatDate(event.endDate)}</p>
-                            <p>Location: {event.locationID}</p>
-                            <p>Category: {event.categoryID}</p>
+                            <p>Location: {getLocationName(event.locationID)}</p>
+                            <p>Category: {getCategoryName(event.categoryID)}</p>
                             <p>Description: {event.description || 'No description available'}</p>
                             {user ? (
                                 <RSVPButton eventId={event.eventID} />
