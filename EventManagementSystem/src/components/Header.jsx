@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../index.css'; // Import global styles
-import '../App.css'; // Import app-specific styles
+import '../App.css';
 import LogoutButton from './LogoutButton';
 import { useSelector } from 'react-redux';
 

@@ -26,7 +26,7 @@ function App() {
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/manage-location" element={<ManageLocation />} />
             <Route path="/manage-category" element={<ManageCategory />} />
-            <Route path="/events/:eventId/edit" element={<UpdateEvent />} /> {/* New route for updating an event */}
+            <Route path="/events/:eventId/edit" element={<UpdateEvent />} />
           </Routes>
         </main>
         <Footer />
